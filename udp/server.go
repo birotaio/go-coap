@@ -356,7 +356,7 @@ func getClose(cc *client.ClientConn) func() {
 	return v.(func())
 }
 
-func (s *Server) getOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, created bool) {
+func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
 	key := raddr.String()
@@ -427,7 +427,7 @@ func (s *Server) getOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPA
 }
 
 func (s *Server) getClientConn(l *coapNet.UDPConn, raddr *net.UDPAddr, firstTime bool) (*client.ClientConn, error) {
-	cc, created := s.getOrCreateClientConn(l, raddr)
+	cc, created := s.GetOrCreateClientConn(l, raddr)
 	if created {
 		if s.onNewClientConn != nil {
 			s.onNewClientConn(cc)
