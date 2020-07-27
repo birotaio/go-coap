@@ -37,8 +37,8 @@ var defaultDialOptions = dialOptions{
 		}()
 		return nil
 	},
-	dialer:                         &net.Dialer{Timeout: time.Second * 3},
-	keepalive:                      keepalive.New(),
+	dialer: &net.Dialer{Timeout: time.Second * 3},
+	// keepalive:                      keepalive.New(),
 	net:                            "udp",
 	blockwiseSZX:                   blockwise.SZX1024,
 	blockwiseEnable:                true,

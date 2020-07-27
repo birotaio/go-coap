@@ -55,7 +55,7 @@ var defaultServerOptions = serverOptions{
 		}()
 		return nil
 	},
-	keepalive:                      keepalive.New(),
+	// keepalive:                      keepalive.New(),
 	blockwiseEnable:                true,
 	blockwiseSZX:                   blockwise.SZX1024,
 	blockwiseTransferTimeout:       time.Second * 3,
