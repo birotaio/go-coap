@@ -197,7 +197,7 @@ func (s *Server) Serve(l *coapNet.UDPConn) error {
 			}
 		}
 		buf = buf[:n]
-		cc, closeFunc, created := s.getOrCreateClientConn(l, raddr)
+		cc, closeFunc, created := s.GetOrCreateClientConn(l, raddr)
 		if created {
 			if s.onNewClientConn != nil {
 				s.onNewClientConn(cc)
@@ -255,7 +255,7 @@ func (s *Server) conn() *coapNet.UDPConn {
 	return s.listen
 }
 
-func (s *Server) getOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, closeFunc func(), created bool) {
+func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, closeFunc func(), created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
 	key := raddr.String()
