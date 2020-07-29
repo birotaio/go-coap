@@ -258,7 +258,7 @@ func (s *Server) conn() *coapNet.UDPConn {
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, closeFunc func(), created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
-	key := raddr.String()
+	key := raddr.IP.String()
 	cc = s.conns[key]
 	if cc == nil {
 		created = true
