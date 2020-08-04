@@ -87,6 +87,7 @@ type serverOptions struct {
 	ctx                            context.Context
 	messagePool                    *pool.Pool
 	blockwiseTransferTimeout       time.Duration
+	indexClientsByAddress          bool
 	errors                         ErrorFunc
 	goPool                         GoPoolFunc
 	createInactivityMonitor        func() inactivity.Monitor
@@ -112,6 +113,7 @@ type Server struct {
 	createInactivityMonitor        func() inactivity.Monitor
 	periodicRunner                 periodic.Func
 	cache                          *cache.Cache
+	indexClientsByAddress          bool
 	blockwiseTransferTimeout       time.Duration
 	onNewClientConn                OnNewClientConnFunc
 	transmissionNStart             time.Duration
@@ -169,10 +171,11 @@ func NewServer(opt ...ServerOption) *Server {
 	doneCtx, doneCancel := context.WithCancel(context.Background())
 
 	return &Server{
-		ctx:            ctx,
-		cancel:         cancel,
-		handler:        opts.handler,
-		maxMessageSize: opts.maxMessageSize,
+		ctx:                   ctx,
+		cancel:                cancel,
+		handler:               opts.handler,
+		maxMessageSize:        opts.maxMessageSize,
+		indexClientsByAddress: opts.indexClientsByAddress,
 		errors: func(err error) {
 			if errors.Is(err, context.Canceled) || errors.Is(err, io.EOF) || strings.Contains(err.Error(), "use of closed network connection") {
 				// this error was produced by cancellation context or closing connection.
@@ -359,7 +362,15 @@ func getClose(cc *client.ClientConn) func() {
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
-	key := raddr.IP.String()
+
+	var key string
+
+	if s.indexClientsByAddress {
+		key = raddr.IP.String()
+	} else {
+		key = raddr.String()
+	}
+
 	cc = s.conns[key]
 	if cc == nil {
 		created = true
