@@ -80,6 +80,22 @@ func WithErrors(errors ErrorFunc) ErrorsOpt {
 	return ErrorsOpt{errors: errors}
 }
 
+type IndexClientsByAddressOpt struct {
+	enabled bool
+}
+
+func (o IndexClientsByAddressOpt) apply(opts *serverOptions) {
+	opts.indexClientsByAddress = o.enabled
+}
+
+// func (o IndexClientsByAddressOpt) applyDial(opts *dialOptions) {
+
+// }
+
+func WithIndexClientsByAddress(enabled bool) IndexClientsByAddressOpt {
+	return IndexClientsByAddressOpt{enabled: enabled}
+}
+
 // GoPoolOpt gopool option.
 type GoPoolOpt struct {
 	goPool GoPoolFunc

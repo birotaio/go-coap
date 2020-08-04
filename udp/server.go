@@ -70,6 +70,7 @@ type serverOptions struct {
 	ctx                            context.Context
 	maxMessageSize                 int
 	handler                        HandlerFunc
+	indexClientsByAddress          bool
 	errors                         ErrorFunc
 	goPool                         GoPoolFunc
 	keepalive                      *keepalive.KeepAlive
@@ -89,6 +90,7 @@ type Server struct {
 	handler                        HandlerFunc
 	errors                         ErrorFunc
 	goPool                         GoPoolFunc
+	indexClientsByAddress          bool
 	keepalive                      *keepalive.KeepAlive
 	blockwiseSZX                   blockwise.SZX
 	blockwiseEnable                bool
@@ -134,6 +136,7 @@ func NewServer(opt ...ServerOption) *Server {
 		cancel:                         cancel,
 		handler:                        opts.handler,
 		maxMessageSize:                 opts.maxMessageSize,
+		indexClientsByAddress:          opts.indexClientsByAddress,
 		errors:                         opts.errors,
 		goPool:                         opts.goPool,
 		keepalive:                      opts.keepalive,
@@ -258,7 +261,15 @@ func (s *Server) conn() *coapNet.UDPConn {
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, closeFunc func(), created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
-	key := raddr.IP.String()
+
+	var key string
+
+	if s.indexClientsByAddress {
+		key = raddr.IP.String()
+	} else {
+		key = raddr.String()
+	}
+
 	cc = s.conns[key]
 	if cc == nil {
 		created = true
