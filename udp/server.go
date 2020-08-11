@@ -302,14 +302,15 @@ func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPA
 			s.transmissionNStart,
 			s.transmissionAcknowledgeTimeout,
 			s.transmissionMaxRetransmit,
-			client.NewObservationHandler(obsHandler, func(w *client.ResponseWriter, r *pool.Message) {
-				h, err := s.multicastHandler.Get(r.Token())
-				if err == nil {
-					h(w, r)
-					return
-				}
-				s.handler(w, r)
-			}),
+			s.handler,
+			// client.NewObservationHandler(obsHandler, func(w *client.ResponseWriter, r *pool.Message) {
+			// 	h, err := s.multicastHandler.Get(r.Token())
+			// 	if err == nil {
+			// 		h(w, r)
+			// 		return
+			// 	}
+			// 	s.handler(w, r)
+			// }),
 			s.blockwiseSZX,
 			blockWise,
 			s.goPool,
