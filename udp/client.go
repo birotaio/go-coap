@@ -44,7 +44,7 @@ var defaultDialOptions = dialOptions{
 	blockwiseEnable:                true,
 	blockwiseTransferTimeout:       time.Second * 3,
 	transmissionNStart:             time.Second,
-	transmissionAcknowledgeTimeout: time.Second * 2,
+	transmissionAcknowledgeTimeout: time.Second * 6,
 	transmissionMaxRetransmit:      4,
 	getMID:                         udpMessage.GetMID,
 }
