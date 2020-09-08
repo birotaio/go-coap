@@ -497,7 +497,7 @@ func (cc *ClientConn) Process(datagram []byte) error {
 			err := cc.session.WriteMessage(w.response)
 			if err != nil {
 				cc.Close()
-				cc.errors(fmt.Errorf("cannot write response: %w", err))
+				cc.errors(fmt.Errorf("cannot write response to %s: %w", cc.RemoteAddr().String(), err))
 				return
 			}
 		} else if typ == udpMessage.Confirmable {
@@ -508,7 +508,7 @@ func (cc *ClientConn) Process(datagram []byte) error {
 			err := cc.session.WriteMessage(w.response)
 			if err != nil {
 				cc.Close()
-				cc.errors(fmt.Errorf("cannot write ack reponse: %w", err))
+				cc.errors(fmt.Errorf("cannot write ack reponse to %s: %w", cc.RemoteAddr().String(), err))
 				return
 			}
 		}
