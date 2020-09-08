@@ -63,7 +63,7 @@ var defaultServerOptions = func() serverOptions {
 		blockwiseTransferTimeout:       time.Second * 3,
 		onNewClientConn:                func(cc *client.ClientConn) {},
 		transmissionNStart:             time.Second,
-		transmissionAcknowledgeTimeout: time.Second * 2,
+		transmissionAcknowledgeTimeout: time.Second * 6,
 		transmissionMaxRetransmit:      4,
 		getMID:                         udpMessage.GetMID,
 		periodicRunner: func(f func(now time.Time) bool) {
