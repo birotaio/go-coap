@@ -712,7 +712,7 @@ func (cc *ClientConn) processReq(req *pool.Message, w *ResponseWriter) error {
 
 func (cc *ClientConn) Process(datagram []byte) error {
 	if uint32(len(datagram)) > cc.session.MaxMessageSize() {
-		return fmt.Errorf("max message size(%v) was exceeded %v", cc.session.MaxMessageSize(), len(datagram))
+		return fmt.Errorf("[%s] max message size(%v) was exceeded %v", cc.RemoteAddr().String(), cc.session.MaxMessageSize(), len(datagram))
 	}
 	req := cc.AcquireMessage(cc.Context())
 	_, err := req.Unmarshal(datagram)
