@@ -463,13 +463,13 @@ func (cc *ClientConn) Sequence() uint64 {
 
 func (cc *ClientConn) Process(datagram []byte) error {
 	if cc.session.MaxMessageSize() >= 0 && len(datagram) > cc.session.MaxMessageSize() {
-		return fmt.Errorf("max message size(%v) was exceeded %v", cc.session.MaxMessageSize(), len(datagram))
+		return fmt.Errorf("[%s] max message size(%v) was exceeded %v", cc.RemoteAddr().String(), cc.session.MaxMessageSize(), len(datagram))
 	}
 	req := pool.AcquireMessage(cc.Context())
 	_, err := req.Unmarshal(datagram)
 	if err != nil {
 		pool.ReleaseMessage(req)
-		return err
+		return fmt.Errorf("[%s] %w", cc.RemoteAddr().String(), err)
 	}
 	req.SetSequence(cc.Sequence())
 	cc.goPool(func() {
@@ -497,7 +497,7 @@ func (cc *ClientConn) Process(datagram []byte) error {
 			err := cc.session.WriteMessage(w.response)
 			if err != nil {
 				cc.Close()
-				cc.errors(fmt.Errorf("cannot write response to %s: %w", cc.RemoteAddr().String(), err))
+				cc.errors(fmt.Errorf("[%s] cannot write response: %w", cc.RemoteAddr().String(), err))
 				return
 			}
 		} else if typ == udpMessage.Confirmable {
@@ -508,7 +508,7 @@ func (cc *ClientConn) Process(datagram []byte) error {
 			err := cc.session.WriteMessage(w.response)
 			if err != nil {
 				cc.Close()
-				cc.errors(fmt.Errorf("cannot write ack reponse to %s: %w", cc.RemoteAddr().String(), err))
+				cc.errors(fmt.Errorf("[%s] cannot write ack reponse: %w", cc.RemoteAddr().String(), err))
 				return
 			}
 		}
