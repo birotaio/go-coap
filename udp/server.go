@@ -359,18 +359,19 @@ func getClose(cc *client.ClientConn) func() {
 	return v.(func())
 }
 
+func (s *Server) buildClientKey(raddr *net.UDPAddr) string {
+	if s.indexClientsByAddress {
+		return raddr.IP.String()
+	} else {
+		return raddr.String()
+	}
+}
+
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
 
-	var key string
-
-	if s.indexClientsByAddress {
-		key = raddr.IP.String()
-	} else {
-		key = raddr.String()
-	}
-
+	key := s.buildClientKey(raddr)
 	cc = s.conns[key]
 	if cc == nil {
 		created = true
