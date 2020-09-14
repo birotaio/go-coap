@@ -225,6 +225,13 @@ func (s *Server) Serve(l *coapNet.UDPConn) error {
 		if err != nil {
 			cc.Close()
 			s.errors(err)
+
+			raddr, ok := cc.Client().RemoteAddr().(*net.UDPAddr)
+			if ok {
+				// remove session from active connections
+				key := s.buildClientKey(raddr)
+				s.conns[key] = nil
+			}
 		}
 	}
 }
@@ -258,18 +265,19 @@ func (s *Server) conn() *coapNet.UDPConn {
 	return s.listen
 }
 
+func (s *Server) buildClientKey(raddr *net.UDPAddr) string {
+	if s.indexClientsByAddress {
+		return raddr.IP.String()
+	} else {
+		return raddr.String()
+	}
+}
+
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, closeFunc func(), created bool) {
 	s.connsMutex.Lock()
 	defer s.connsMutex.Unlock()
 
-	var key string
-
-	if s.indexClientsByAddress {
-		key = raddr.IP.String()
-	} else {
-		key = raddr.String()
-	}
-
+	key := s.buildClientKey(raddr)
 	cc = s.conns[key]
 	if cc == nil {
 		created = true
