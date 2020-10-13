@@ -88,6 +88,7 @@ type serverOptions struct {
 	messagePool                    *pool.Pool
 	blockwiseTransferTimeout       time.Duration
 	indexClientsByAddress          bool
+	forcedClientPort               int
 	errors                         ErrorFunc
 	goPool                         GoPoolFunc
 	createInactivityMonitor        func() inactivity.Monitor
@@ -114,6 +115,7 @@ type Server struct {
 	periodicRunner                 periodic.Func
 	cache                          *cache.Cache
 	indexClientsByAddress          bool
+	forcedClientPort               int
 	blockwiseTransferTimeout       time.Duration
 	onNewClientConn                OnNewClientConnFunc
 	transmissionNStart             time.Duration
@@ -360,11 +362,15 @@ func getClose(cc *client.ClientConn) func() {
 }
 
 func (s *Server) buildClientKey(raddr *net.UDPAddr) string {
+	if s.forcedClientPort != 0 {
+		raddr.Port = 5683
+	}
+
 	if s.indexClientsByAddress {
 		return raddr.IP.String()
-	} else {
-		return raddr.String()
 	}
+
+	return raddr.String()
 }
 
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, created bool) {
