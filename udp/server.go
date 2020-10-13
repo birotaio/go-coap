@@ -71,6 +71,7 @@ type serverOptions struct {
 	maxMessageSize                 int
 	handler                        HandlerFunc
 	indexClientsByAddress          bool
+	forcedClientPort               int
 	errors                         ErrorFunc
 	goPool                         GoPoolFunc
 	keepalive                      *keepalive.KeepAlive
@@ -91,6 +92,7 @@ type Server struct {
 	errors                         ErrorFunc
 	goPool                         GoPoolFunc
 	indexClientsByAddress          bool
+	forcedClientPort               int
 	keepalive                      *keepalive.KeepAlive
 	blockwiseSZX                   blockwise.SZX
 	blockwiseEnable                bool
@@ -266,11 +268,15 @@ func (s *Server) conn() *coapNet.UDPConn {
 }
 
 func (s *Server) buildClientKey(raddr *net.UDPAddr) string {
+	if s.forcedClientPort != 0 {
+		raddr.Port = 5683
+	}
+
 	if s.indexClientsByAddress {
 		return raddr.IP.String()
-	} else {
-		return raddr.String()
 	}
+
+	return raddr.String()
 }
 
 func (s *Server) GetOrCreateClientConn(UDPConn *coapNet.UDPConn, raddr *net.UDPAddr) (cc *client.ClientConn, closeFunc func(), created bool) {

@@ -80,6 +80,7 @@ func WithErrors(errors ErrorFunc) ErrorsOpt {
 	return ErrorsOpt{errors: errors}
 }
 
+// IndexClientsByAddres
 type IndexClientsByAddressOpt struct {
 	enabled bool
 }
@@ -89,11 +90,25 @@ func (o IndexClientsByAddressOpt) apply(opts *serverOptions) {
 }
 
 // func (o IndexClientsByAddressOpt) applyDial(opts *dialOptions) {
+// func (o ForcedClientPortOpt) applyDial(opts *dialOptions) {
 
 // }
 
 func WithIndexClientsByAddress(enabled bool) IndexClientsByAddressOpt {
 	return IndexClientsByAddressOpt{enabled: enabled}
+}
+
+// ForcedClientPort
+type ForcedClientPortOpt struct {
+	port int
+}
+
+func (o ForcedClientPortOpt) apply(opts *serverOptions) {
+	opts.forcedClientPort = o.port
+}
+
+func WithForcedClientPort(port int) ForcedClientPortOpt {
+	return ForcedClientPortOpt{port: port}
 }
 
 // GoPoolOpt gopool option.
