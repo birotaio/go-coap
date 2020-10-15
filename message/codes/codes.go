@@ -88,6 +88,15 @@ var strToCode = map[string]Code{
 	`"Abort"`:                              Abort,
 }
 
+func (c Code) IsSuccess() bool {
+	switch c {
+	case Created, Deleted, Valid, Changed, Content:
+		return true
+	}
+
+	return false
+}
+
 // UnmarshalJSON unmarshals b into the Code.
 func (c *Code) UnmarshalJSON(b []byte) error {
 	// From json.Unmarshaler: By convention, to approximate the behavior of
