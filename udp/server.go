@@ -232,7 +232,9 @@ func (s *Server) Serve(l *coapNet.UDPConn) error {
 			if ok {
 				// remove session from active connections
 				key := s.buildClientKey(raddr)
+				s.connsMutex.Lock()
 				s.conns[key] = nil
+				s.connsMutex.Unlock()
 			}
 		}
 	}
