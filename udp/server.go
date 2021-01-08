@@ -279,6 +279,15 @@ func (s *Server) Serve(l *coapNet.UDPConn) error {
 		if err != nil {
 			s.closeConnection(cc)
 			s.errors(fmt.Errorf("%v: cannot process packet: %w", cc.RemoteAddr(), err))
+
+			raddr, ok := cc.Client().RemoteAddr().(*net.UDPAddr)
+			if ok {
+				// remove session from active connections
+				key := s.buildClientKey(raddr)
+				s.connsMutex.Lock()
+				s.conns[key] = nil
+				s.connsMutex.Unlock()
+			}
 		}
 	}
 }
