@@ -681,9 +681,9 @@ func (b *BlockWise) processReceivedMessage(w ResponseWriter, r Message, maxSzx S
 			szx = maxSzx
 		}
 		// first request must have 0
-		if num != 0 {
-			return fmt.Errorf("token %v, invalid %v(%v), expected 0", []byte(token), blockType, num)
-		}
+		// if num != 0 {
+		// 	return fmt.Errorf("token %v, invalid %v(%v), expected 0", []byte(token), blockType, num)
+		// }
 		// if there is no more then just forward req to next handler
 		if more == false {
 			next(w, r)
