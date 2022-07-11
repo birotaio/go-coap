@@ -160,11 +160,11 @@ func (cc *ClientConn) writeMessage(req *pool.Message) error {
 	}
 	defer cc.midHandlerContainer.Pop(req.MessageID())
 
-	err = cc.session.WriteMessage(req)
-	if err != nil {
-		return fmt.Errorf("cannot write request: %w", err)
-	}
-	for i := 0; i < cc.transmissionMaxRetransmit; i++ {
+	for i := 0; i <= cc.transmissionMaxRetransmit; i++ {
+		err = cc.session.WriteMessage(req)
+		if err != nil {
+			return fmt.Errorf("cannot write request: %w", err)
+		}
 		select {
 		case <-respChan:
 			return nil
@@ -173,17 +173,6 @@ func (cc *ClientConn) writeMessage(req *pool.Message) error {
 		case <-cc.Context().Done():
 			return fmt.Errorf("connection was closed: %w", cc.Context().Err())
 		case <-time.After(cc.transmissionAcknowledgeTimeout):
-			select {
-			case <-req.Context().Done():
-				return req.Context().Err()
-			case <-cc.session.Context().Done():
-				return fmt.Errorf("connection was closed: %w", req.Context().Err())
-			case <-time.After(cc.transmissionNStart):
-				err = cc.session.WriteMessage(req)
-				if err != nil {
-					return fmt.Errorf("cannot write request: %w", err)
-				}
-			}
 		}
 	}
 	return fmt.Errorf("timeout: retransmision(%v) was exhausted", cc.transmissionMaxRetransmit)
