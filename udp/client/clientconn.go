@@ -251,10 +251,6 @@ func (cc *ClientConn) writeMessage(req *pool.Message) error {
 		}()
 	}
 
-	err := cc.session.WriteMessage(req)
-	if err != nil {
-		return fmt.Errorf("cannot write request: %w", err)
-	}
 	if req.Type() != udpMessage.Confirmable {
 		// If the request is not confirmable, we do not need to wait for a response
 		// and skip retransmissions
@@ -263,6 +259,10 @@ func (cc *ClientConn) writeMessage(req *pool.Message) error {
 
 	maxRetransmit := cc.transmission.maxRetransmit.Load()
 	for i := int32(0); i < maxRetransmit; i++ {
+		err := cc.session.WriteMessage(req)
+		if err != nil {
+			return fmt.Errorf("cannot write request: %w", err)
+		}
 		select {
 		case <-respChan:
 			return nil
@@ -271,17 +271,6 @@ func (cc *ClientConn) writeMessage(req *pool.Message) error {
 		case <-cc.Context().Done():
 			return fmt.Errorf("connection was closed: %w", cc.Context().Err())
 		case <-time.After(cc.transmission.acknowledgeTimeout.Load()):
-			select {
-			case <-req.Context().Done():
-				return req.Context().Err()
-			case <-cc.session.Context().Done():
-				return fmt.Errorf("connection was closed: %w", cc.Context().Err())
-			case <-time.After(cc.transmission.nStart.Load()):
-				err = cc.session.WriteMessage(req)
-				if err != nil {
-					return fmt.Errorf("cannot write request: %w", err)
-				}
-			}
 		}
 	}
 	return fmt.Errorf("timeout: retransmission(%v) was exhausted", cc.transmission.maxRetransmit.Load())
